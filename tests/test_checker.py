@@ -39,7 +39,31 @@ class TestChecker(unittest.TestCase):
         self.assertFalse(self.__checker_p2__.is_borne_off)
         self.assertTrue(self.__checker_p2__.is_movable())
     
-   
+    def test_initialization_without_position(self):
+        """
+        Verifica la inicialización de fichas sin posición inicial.
+        """
+        checker = Checker(1)
+        
+        self.assertEqual(checker.player_id, 1)
+        self.assertIsNone(checker.position)
+        self.assertFalse(checker.is_on_bar)
+        self.assertFalse(checker.is_borne_off)
+        self.assertTrue(checker.is_movable())
+    
+    def test_initialization_invalid_player_id(self):
+        """
+        Verifica que se lance excepción con player_id inválido.
+        """
+        with self.assertRaises(ValueError):
+            Checker(0)
+        
+        with self.assertRaises(ValueError):
+            Checker(3)
+        
+        with self.assertRaises(ValueError):
+            Checker(-1)
+    
    
 
 
