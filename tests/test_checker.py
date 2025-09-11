@@ -205,7 +205,63 @@ class TestChecker(unittest.TestCase):
         
         checker.position = 12
         self.assertFalse(checker.is_in_home_board())
-
+def test_is_in_home_board_player2(self):
+        """
+        Verifica detección del tablero casa para jugador 2.
+        """
+        # Jugador 2: tablero casa es puntos 18-23
+        checker = Checker(2, 20)
+        self.assertTrue(checker.is_in_home_board())
+        
+        checker.position = 18
+        self.assertTrue(checker.is_in_home_board())
+        
+        checker.position = 23
+        self.assertTrue(checker.is_in_home_board())
+        
+        # Fuera del tablero casa
+        checker.position = 17
+        self.assertFalse(checker.is_in_home_board())
+        
+        checker.position = 12
+        self.assertFalse(checker.is_in_home_board())
+    
+def test_is_in_home_board_no_position(self):
+        """
+        Verifica que fichas sin posición no estén en tablero casa.
+        """
+        checker = Checker(1)
+        checker.position = None
+        self.assertFalse(checker.is_in_home_board())
+        
+        # Ficha en la barra
+        checker.move_to_bar()
+        self.assertFalse(checker.is_in_home_board())
+        
+        # Ficha sacada
+        checker = Checker(1, 3)
+        checker.bear_off()
+        self.assertFalse(checker.is_in_home_board())
+def test_string_representations(self):
+        """
+        Verifica las representaciones en cadena de las fichas.
+        """
+        # Ficha normal
+        str_repr = str(self.__checker_p1__)
+        self.assertIn("Player 1", str_repr)
+        self.assertIn("Position 12", str_repr)
+        
+        # Ficha en la barra
+        self.__checker_p1__.move_to_bar()
+        str_repr = str(self.__checker_p1__)
+        self.assertIn("ON BAR", str_repr)
+        
+        # Ficha sacada
+        checker = Checker(2, 5)
+        checker.bear_off()
+        str_repr = str(checker)
+        self.assertIn("BORNE OFF", str_repr)
+    
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
