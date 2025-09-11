@@ -8,7 +8,7 @@ de Backgammon, incluyendo tiradas, dobles, y uso de valores.
 import unittest
 from unittest.mock import patch
 from core.dice import Dice
-from core.exceptions import InvalidDiceValueException
+from core.exception import InvalidDiceValueException
 
 
 class TestDice(unittest.TestCase):
