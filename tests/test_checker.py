@@ -205,7 +205,7 @@ class TestChecker(unittest.TestCase):
         
         checker.position = 12
         self.assertFalse(checker.is_in_home_board())
-def test_is_in_home_board_player2(self):
+    def test_is_in_home_board_player2(self):
         """
         Verifica detección del tablero casa para jugador 2.
         """
@@ -226,7 +226,7 @@ def test_is_in_home_board_player2(self):
         checker.position = 12
         self.assertFalse(checker.is_in_home_board())
     
-def test_is_in_home_board_no_position(self):
+    def test_is_in_home_board_no_position(self):
         """
         Verifica que fichas sin posición no estén en tablero casa.
         """
@@ -242,7 +242,7 @@ def test_is_in_home_board_no_position(self):
         checker = Checker(1, 3)
         checker.bear_off()
         self.assertFalse(checker.is_in_home_board())
-def test_string_representations(self):
+    def test_string_representations(self):
         """
         Verifica las representaciones en cadena de las fichas.
         """
@@ -261,7 +261,43 @@ def test_string_representations(self):
         checker.bear_off()
         str_repr = str(checker)
         self.assertIn("BORNE OFF", str_repr)
+    def test_repr(self):
+        """
+        Verifica la representación técnica de las fichas.
+        """
+        repr_str = repr(self.__checker_p1__)
+        self.assertIn("Checker", repr_str)
+        self.assertIn("player_id=1", repr_str)
+        self.assertIn("position=12", repr_str)
+        self.assertIn("is_on_bar=False", repr_str)
+        self.assertIn("is_borne_off=False", repr_str)
     
+    def test_equality(self):
+        """
+        Verifica la comparación de igualdad entre fichas.
+        """
+        # Fichas idénticas
+        checker1 = Checker(1, 12)
+        checker2 = Checker(1, 12)
+        self.assertEqual(checker1, checker2)
+        
+        # Fichas diferentes por jugador
+        checker3 = Checker(2, 12)
+        self.assertNotEqual(checker1, checker3)
+        
+        # Fichas diferentes por posición
+        checker4 = Checker(1, 8)
+        self.assertNotEqual(checker1, checker4)
+        
+        # Fichas con estados diferentes
+        checker5 = Checker(1, 12)
+        checker5.move_to_bar()
+        self.assertNotEqual(checker1, checker5)
+        
+        # Comparación con objeto de otro tipo
+        self.assertNotEqual(checker1, "string")
+        self.assertNotEqual(checker1, 12)
+        self.assertNotEqual(checker1, None)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
