@@ -141,6 +141,70 @@ class TestChecker(unittest.TestCase):
         
         with self.assertRaises(RuntimeError):
             self.__checker_p1__.move_from_bar_to(18)
+    def test_bear_off(self):
+        """
+        Verifica el proceso de sacar fichas del tablero.
+        """
+        self.__checker_p1__.bear_off()
+        
+        self.assertIsNone(self.__checker_p1__.position)
+        self.assertFalse(self.__checker_p1__.is_on_bar)
+        self.assertTrue(self.__checker_p1__.is_borne_off)
+        self.assertFalse(self.__checker_p1__.is_movable())
+    
+    def test_move_to_valid_position(self):
+        """
+        Verifica movimientos normales a posiciones válidas.
+        """
+        original_position = self.__checker_p1__.position
+        
+        self.__checker_p1__.move_to(8)
+        
+        self.assertEqual(self.__checker_p1__.position, 8)
+        self.assertFalse(self.__checker_p1__.is_on_bar)
+        self.assertFalse(self.__checker_p1__.is_borne_off)
+        self.assertTrue(self.__checker_p1__.is_movable())
+    
+    def test_move_to_invalid_position(self):
+        """
+        Verifica que mover a posición inválida falle.
+        """
+        with self.assertRaises(ValueError):
+            self.__checker_p1__.move_to(-1)
+        
+        with self.assertRaises(ValueError):
+            self.__checker_p1__.move_to(24)
+    
+    def test_move_borne_off_checker(self):
+        """
+        Verifica que no se pueda mover una ficha ya sacada.
+        """
+        self.__checker_p1__.bear_off()
+        self.assertTrue(self.__checker_p1__.is_borne_off)
+        
+        with self.assertRaises(RuntimeError):
+            self.__checker_p1__.move_to(5)
+    
+    def test_is_in_home_board_player1(self):
+        """
+        Verifica detección del tablero casa para jugador 1.
+        """
+        # Jugador 1: tablero casa es puntos 0-5
+        checker = Checker(1, 3)
+        self.assertTrue(checker.is_in_home_board())
+        
+        checker.position = 0
+        self.assertTrue(checker.is_in_home_board())
+        
+        checker.position = 5
+        self.assertTrue(checker.is_in_home_board())
+        
+        # Fuera del tablero casa
+        checker.position = 6
+        self.assertFalse(checker.is_in_home_board())
+        
+        checker.position = 12
+        self.assertFalse(checker.is_in_home_board())
 
 
 if __name__ == '__main__':
