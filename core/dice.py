@@ -34,3 +34,19 @@ class Dice:
         self.__available_moves__ = []
         self.__used_moves__ = []
         self.__is_rolled__ = False
+    def roll(self) -> Tuple[int, int]:
+       
+        self.__dice1__ = random.randint(1, 6)
+        self.__dice2__ = random.randint(1, 6)
+        self.__is_rolled__ = True
+        
+        # Resetear movimientos
+        self.__used_moves__ = []
+        
+        # Si son dobles, se pueden usar 4 veces
+        if self.__dice1__ == self.__dice2__:
+            self.__available_moves__ = [self.__dice1__] * 4
+        else:
+            self.__available_moves__ = [self.__dice1__, self.__dice2__]
+        
+        return (self.__dice1__, self.__dice2__)@property
