@@ -91,7 +91,58 @@ class TestDice(unittest.TestCase):
         self.assertEqual(self.__dice__.available_moves, [])
         self.assertEqual(self.__dice__.used_moves, [3, 6])
         self.assertFalse(self.__dice__.has_available_moves())
-
+    def test_use_value_unavailable(self):
+        """
+        Verifica que no se pueda usar un valor no disponible.
+        """
+        # Simular tirada de 2, 4
+        self.__dice__._Dice__dice1__ = 2
+        self.__dice__._Dice__dice2__ = 4
+        self.__dice__._Dice__available_moves__ = [2, 4]
+        self.__dice__._Dice__is_rolled__ = True
+        
+        # Intentar usar valor no disponible
+        result = self.__dice__.use_value(6)
+        
+        self.assertFalse(result)
+        self.assertEqual(self.__dice__.available_moves, [2, 4])
+        self.assertEqual(self.__dice__.used_moves, [])
+    
+    def test_use_value_invalid_range(self):
+        """
+        Verifica que se lance excepción con valores fuera de rango.
+        """
+        with self.assertRaises(InvalidDiceValueException):
+            self.__dice__.use_value(0)
+        
+        with self.assertRaises(InvalidDiceValueException):
+            self.__dice__.use_value(7)
+        
+        with self.assertRaises(InvalidDiceValueException):
+            self.__dice__.use_value(-1)
+    
+    def test_use_double_values(self):
+        """
+        Verifica el uso de valores en tirada doble.
+        """
+        # Simular dobles de 4
+        self.__dice__._Dice__dice1__ = 4
+        self.__dice__._Dice__dice2__ = 4
+        self.__dice__._Dice__available_moves__ = [4, 4, 4, 4]
+        self.__dice__._Dice__is_rolled__ = True
+        
+        # Usar los cuatro valores de 4
+        for i in range(4):
+            result = self.__dice__.use_value(4)
+            self.assertTrue(result)
+            self.assertEqual(len(self.__dice__.available_moves), 3 - i)
+            self.assertEqual(len(self.__dice__.used_moves), i + 1)
+        
+        # Ya no quedan valores disponibles
+        self.assertFalse(self.__dice__.has_available_moves())
+        result = self.__dice__.use_value(4)
+        self.assertFalse(result)
+    
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
