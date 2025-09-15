@@ -49,4 +49,16 @@ class Dice:
         else:
             self.__available_moves__ = [self.__dice1__, self.__dice2__]
         
-        return (self.__dice1__, self.__dice2__)@property
+        return (self.__dice1__, self.__dice2__)
+    @property
+    def values(self) -> Tuple[int, int]:
+        """
+        Obtiene los valores actuales de los dados.
+        
+        Returns:
+            Tuple[int, int]: Valores de los dados (dado1, dado2)
+        """
+    
+        return (self.__dice1__, self.__dice2__)
+    
+    @property
