@@ -66,7 +66,31 @@ class TestDice(unittest.TestCase):
         self.assertEqual(self.__dice__.available_moves, [5, 5, 5, 5])
         self.assertEqual(len(self.__dice__.available_moves), 4)
         self.assertTrue(self.__dice__.has_available_moves())
-    
+    def test_use_value_valid(self):
+        """
+        Verifica el uso correcto de valores de dados disponibles.
+        """
+        # Simular tirada de 3, 6
+        self.__dice__._Dice__dice1__ = 3
+        self.__dice__._Dice__dice2__ = 6
+        self.__dice__._Dice__available_moves__ = [3, 6]
+        self.__dice__._Dice__is_rolled__ = True
+        
+        # Usar el 3
+        result = self.__dice__.use_value(3)
+        
+        self.assertTrue(result)
+        self.assertEqual(self.__dice__.available_moves, [6])
+        self.assertEqual(self.__dice__.used_moves, [3])
+        self.assertTrue(self.__dice__.has_available_moves())
+        
+        # Usar el 6
+        result = self.__dice__.use_value(6)
+        
+        self.assertTrue(result)
+        self.assertEqual(self.__dice__.available_moves, [])
+        self.assertEqual(self.__dice__.used_moves, [3, 6])
+        self.assertFalse(self.__dice__.has_available_moves())
 
 
 if __name__ == '__main__':
