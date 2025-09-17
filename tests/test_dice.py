@@ -142,7 +142,62 @@ class TestDice(unittest.TestCase):
         self.assertFalse(self.__dice__.has_available_moves())
         result = self.__dice__.use_value(4)
         self.assertFalse(result)
+    def test_can_use_value(self):
+        """
+        Verifica la función de verificación de valores disponibles.
+        """
+        # Sin tirar dados
+        self.assertFalse(self.__dice__.can_use_value(3))
+        
+        # Con dados tirados
+        self.__dice__._Dice__available_moves__ = [2, 5]
+        
+        self.assertTrue(self.__dice__.can_use_value(2))
+        self.assertTrue(self.__dice__.can_use_value(5))
+        self.assertFalse(self.__dice__.can_use_value(3))
+        self.assertFalse(self.__dice__.can_use_value(6))
     
+    def test_get_max_available_value(self):
+        """
+        Verifica la obtención del valor máximo disponible.
+        """
+        # Sin dados disponibles
+        self.assertEqual(self.__dice__.get_max_available_value(), 0)
+        
+        # Con dados disponibles
+        self.__dice__._Dice__available_moves__ = [2, 6, 3]
+        self.assertEqual(self.__dice__.get_max_available_value(), 6)
+        
+        # Con un solo dado
+        self.__dice__._Dice__available_moves__ = [4]
+        self.assertEqual(self.__dice__.get_max_available_value(), 4)
+    
+    def test_get_min_available_value(self):
+        """
+        Verifica la obtención del valor mínimo disponible.
+        """
+        # Sin dados disponibles
+        self.assertEqual(self.__dice__.get_min_available_value(), 0)
+        
+        # Con dados disponibles
+        self.__dice__._Dice__available_moves__ = [2, 6, 3]
+        self.assertEqual(self.__dice__.get_min_available_value(), 2)
+        
+        # Con un solo dado
+        self.__dice__._Dice__available_moves__ = [5]
+        self.assertEqual(self.__dice__.get_min_available_value(), 5)
+    
+    def test_can_use_exact_value(self):
+        """
+        Verifica la función para valores exactos.
+        """
+        self.__dice__._Dice__available_moves__ = [1, 3, 6]
+        
+        self.assertTrue(self.__dice__.can_use_exact_value(1))
+        self.assertTrue(self.__dice__.can_use_exact_value(3))
+        self.assertTrue(self.__dice__.can_use_exact_value(6))
+        self.assertFalse(self.__dice__.can_use_exact_value(2))
+        self.assertFalse(self.__dice__.can_use_exact_value(5))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
