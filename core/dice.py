@@ -101,3 +101,32 @@ class Dice:
     def can_use_value(self, value: int) -> bool:
        
         return value in self.__available_moves__
+    def has_available_moves(self) -> bool:
+        """
+        Verifica si quedan movimientos disponibles.
+        
+        Returns:
+            bool: True si hay movimientos disponibles
+        """
+        return len(self.__available_moves__) > 0
+    
+    def is_double(self) -> bool:
+        """
+        Verifica si la última tirada fueron dobles.
+        
+        Returns:
+            bool: True si fueron dobles
+        """
+        return self.__is_rolled__ and self.__dice1__ == self.__dice2__
+    
+    def get_max_available_value(self) -> int:
+        """
+        Obtiene el valor máximo disponible entre los dados.
+        
+        Returns:
+            int: Valor máximo disponible, 0 si no hay movimientos disponibles
+        """
+        if not self.__available_moves__:
+            return 0
+        return max(self.__available_moves__)
+    
