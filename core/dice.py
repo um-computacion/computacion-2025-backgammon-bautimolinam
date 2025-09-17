@@ -62,3 +62,16 @@ class Dice:
         return (self.__dice1__, self.__dice2__)
     
     @property
+    def available_moves(self) -> List[int]:
+        """
+        Obtiene los valores de dados disponibles para usar.
+        
+        Returns:
+            List[int]: Lista de valores disponibles para movimientos
+        """
+        return self.__available_moves__.copy()
+    
+    @property
+    def used_moves(self) -> List[int]:
+        
+        return self.__used_moves__.copy()
