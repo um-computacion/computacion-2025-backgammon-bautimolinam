@@ -75,3 +75,29 @@ class Dice:
     def used_moves(self) -> List[int]:
         
         return self.__used_moves__.copy()
+    def use_value(self, value: int) -> bool:
+        """
+        Marca un valor de dado como utilizado.
+        
+        Args:
+            value (int): Valor del dado a utilizar (1-6)
+        
+        Returns:
+            bool: True si el valor se pudo usar, False si no estaba disponible
+        
+        Raises:
+            InvalidDiceValueException: Si el valor no es válido (1-6)
+        """
+        if value < 1 or value > 6:
+            raise InvalidDiceValueException(value)
+        
+        if value in self.__available_moves__:
+            self.__available_moves__.remove(value)
+            self.__used_moves__.append(value)
+            return True
+        
+        return False
+    
+    def can_use_value(self, value: int) -> bool:
+       
+        return value in self.__available_moves__
