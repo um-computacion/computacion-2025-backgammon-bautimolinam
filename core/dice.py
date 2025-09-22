@@ -165,3 +165,84 @@ class Dice:
             return min(available_higher)
         
         return 0
+    def reset(self) -> None:
+        """
+        Reinicia el estado de los dados.
+        
+        Limpia todos los valores y marca como no tirados.
+        """
+        self.__dice1__ = 0
+        self.__dice2__ = 0
+        self.__available_moves__ = []
+        self.__used_moves__ = []
+        self.__is_rolled__ = False
+    
+    def is_rolled(self) -> bool:
+        """
+        Verifica si ya se realizó una tirada.
+        
+        Returns:
+            bool: True si ya se tiró
+        """
+        return self.__is_rolled__
+    
+    def __str__(self) -> str:
+        """
+        Representación en cadena de los dados.
+        
+        Returns:
+            str: Representación textual de los dados
+        """
+        if not self.__is_rolled__:
+            return "Dice(Not rolled)"
+        
+        double_text = " (DOUBLES)" if self.is_double() else ""
+        available_text = f", Available: {self.__available_moves__}" if self.__available_moves__ else ""
+        used_text = f", Used: {self.__used_moves__}" if self.__used_moves__ else ""
+        
+        return f"Dice({self.__dice1__}, {self.__dice2__}){double_text}{available_text}{used_text}"
+    
+    def __repr__(self) -> str:
+        """
+        Representación técnica de los dados.
+        
+        Returns:
+            str: Representación para debugging
+        """
+        return (f"Dice(dice1={self.__dice1__}, dice2={self.__dice2__}, "
+                f"available_moves={self.__available_moves__}, used_moves={self.__used_moves__}, "
+                f"is_rolled={self.__is_rolled__})")
+    
+    def get_min_available_value(self) -> int:
+        """
+        Obtiene el valor mínimo disponible entre los dados.
+        
+        Returns:
+            int: Valor mínimo disponible, 0 si no hay movimientos disponibles
+        """
+        if not self.__available_moves__:
+            return 0
+        return min(self.__available_moves__)
+    
+    def can_use_exact_value(self, value: int) -> bool:
+        """
+        Verifica si se puede usar exactamente un valor específico.
+        
+
+        """
+        return value in self.__available_moves__
+    
+    def can_use_value_or_higher(self, min_value: int) -> bool:
+        """
+        Verifica si hay algún valor disponible igual o mayor al especificado.
+        
+        Útil para bear off cuando se puede usar un valor mayor.
+        
+        Args:
+            min_value (int): Valor mínimo requerido
+        
+        Returns:
+            bool: True si hay un valor >= min_value disponible
+        """
+        return any(value >= min_value for value in self.__available_moves__)
+    
