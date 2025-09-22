@@ -129,4 +129,39 @@ class Dice:
         if not self.__available_moves__:
             return 0
         return max(self.__available_moves__)
+    def get_min_available_value(self) -> int:
+        """
+        Obtiene el valor mínimo disponible entre los dados.
+        
+        Returns:
+            int: Valor mínimo disponible, 0 si no hay movimientos disponibles
+        """
+        if not self.__available_moves__:
+            return 0
+        return min(self.__available_moves__)
     
+    def can_use_exact_value(self, value: int) -> bool:
+      
+        return value in self.__available_moves__
+    
+    def can_use_value_or_higher(self, min_value: int) -> bool:
+        """
+        Verifica si hay algún valor disponible igual o mayor al especificado.
+       """
+        return any(value >= min_value for value in self.__available_moves__)
+    
+    def get_usable_value_for_bear_off(self, required_value: int) -> int:
+        """
+        Obtiene un valor utilizable para bear off.
+        
+        """
+        # Primero intentar el valor exacto
+        if required_value in self.__available_moves__:
+            return required_value
+        
+        # Si no está disponible, buscar el menor valor mayor
+        available_higher = [v for v in self.__available_moves__ if v > required_value]
+        if available_higher:
+            return min(available_higher)
+        
+        return 0
