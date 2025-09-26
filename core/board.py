@@ -58,5 +58,17 @@ class Board:
         self.__bar_player2__.clear()
         self.__borne_off_player1__.clear()
         self.__borne_off_player2__.clear()
+    def get_point_checkers(self, point: int) -> List[Checker]:
+       
+        if point < 0 or point > 23:
+            raise InvalidPointException(point)
+        
+        return self.__points__[point].copy()
     
+    def get_point_owner(self, point: int) -> Optional[int]:
+       
+        checkers = self.get_point_checkers(point)
+        if not checkers:
+            return None
+        return checkers[0].player_id
    
