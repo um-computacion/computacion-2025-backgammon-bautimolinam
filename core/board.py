@@ -250,4 +250,122 @@ class Board:
             return not self._has_checkers_further_out(player_id, from_point)
         
         return False
+    def _can_player_bear_off(self, player_id: int) -> bool:
+       
+        # No puede sacar si tiene fichas en la barra
+        if self.has_checkers_on_bar(player_id):
+            return False
+        
+        # Verificar que todas las fichas estén en el tablero casa
+        home_range = self._get_home_board_range(player_id)
+        
+        for point in range(24):
+            checkers = self.get_point_checkers(point)
+            for checker in checkers:
+                if (checker.player_id == player_id and 
+                    (point < home_range[0] or point > home_range[1])):
+                    return False
+        
+        return True
+    
+    def _get_home_board_range(self, player_id: int) -> Tuple[int, int]:
+      
+        if player_id == 1:
+            return (0, 5)
+        else:
+            return (18, 23)
+    
+    def _has_checkers_further_out(self, player_id: int, from_point: int) -> bool:
+       
+        home_range = self._get_home_board_range(player_id)
+        
+        if player_id == 1:
+            # Para jugador 1, buscar fichas en puntos mayores dentro del home
+            for point in range(from_point + 1, home_range[1] + 1):
+                checkers = self.get_point_checkers(point)
+                if any(c.player_id == player_id for c in checkers):
+                    return True
+        else:
+            # Para jugador 2, buscar fichas en puntos menores dentro del home
+            for point in range(home_range[0], from_point):
+                checkers = self.get_point_checkers(point)
+                if any(c.player_id == player_id for c in checkers):
+                    return True
+        
+        return False
+    
+    def bear_off_checker(self, from_point: int, player_id: int, dice_value: int) -> None:
+        
+        if not self.can_bear_off_from(from_point, player_id, dice_value):
+            raise CannotBearOffException(player_id, f"No se puede sacar desde el punto {from_point}")
+        
+        # Quitar la ficha del punto
+        from_checkers = self.get_point_checkers(from_point)
+        if not from_checkers or from_checkers[0].player_id != player_id:
+            raise CheckerNotAvailableException(from_point, player_id)
+        
+        borne_off_checker = self.__points__[from_point].pop()
+        borne_off_checker.bear_off()
+        
+        # Agregar a la lista de fichas sacadas
+        if player_id == 1:
+            self.__borne_off_player1__.append(borne_off_checker)
+        else:
+            self.__borne_off_player2__.append(borne_off_checker)
+    
+    def get_borne_off_checkers(self, player_id: int) -> List[Checker]:
+       
+        if player_id == 1:
+            return self.__borne_off_player1__.copy()
+        else:
+            return self.__borne_off_player2__.copy()
+    
+    def get_borne_off_count(self, player_id: int) -> int:
+        
+        return len(self.get_borne_off_checkers(player_id))
+    
+    def is_game_won(self, player_id: int) -> bool:
+       
+        return self.get_borne_off_count(player_id) == 15
+    
+    def get_valid_moves_for_dice(self, player_id: int, dice_value: int) -> List[Tuple[int, int]]:
+       
+        valid_moves = []
+        
+        # Si el jugador tiene fichas en la barra, debe moverlas primero
+        if self.has_checkers_on_bar(player_id):
+            entry_range = self._get_bar_entry_range(player_id)
+            
+            if player_id == 1:
+                target_point = entry_range[1] - dice_value + 1  # 24 - dice_value
+            else:
+                target_point = entry_range[0] + dice_value - 1  # dice_value - 1
+            
+            if (entry_range[0] <= target_point <= entry_range[1] and
+                self.can_enter_from_bar(target_point, player_id)):
+                valid_moves.append((-1, target_point))
+        
+        else:
+            # Movimientos normales y bear off
+            for point in range(24):
+                checkers = self.get_point_checkers(point)
+                if not checkers or checkers[0].player_id != player_id:
+                    continue
+                
+                # Calcular punto de destino
+                if player_id == 1:
+                    target_point = point - dice_value
+                else:
+                    target_point = point + dice_value
+                
+                # Movimiento normal
+                if 0 <= target_point <= 23:
+                    if self.can_move_from_to(point, target_point, player_id):
+                        valid_moves.append((point, target_point))
+                
+                # Bear off
+                elif self.can_bear_off_from(point, player_id, dice_value):
+                    valid_moves.append((point, -1))
+        
+        return valid_moves
     
