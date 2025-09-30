@@ -132,4 +132,122 @@ class Board:
             
         except InvalidPointException:
             return False
+    def move_checker(self, from_point: int, to_point: int, player_id: int) -> Optional[Checker]:
+       
+        # Validar el movimiento
+        if not self.can_move_from_to(from_point, to_point, player_id):
+            raise InvalidMoveException(from_point, to_point, "Movimiento no válido")
+        
+        # Obtener la ficha del punto de origen
+        from_checkers = self.get_point_checkers(from_point)
+        if not from_checkers or from_checkers[0].player_id != player_id:
+            raise CheckerNotAvailableException(from_point, player_id)
+        
+        # Quitar la ficha del punto de origen
+        moving_checker = self.__points__[from_point].pop()
+        
+        # Verificar si hay que capturar una ficha
+        captured_checker = None
+        to_checkers = self.get_point_checkers(to_point)
+        
+        if to_checkers and len(to_checkers) == 1 and to_checkers[0].player_id != player_id:
+            # Capturar la ficha del oponente
+            captured_checker = self.__points__[to_point].pop()
+            self._move_checker_to_bar(captured_checker)
+        
+        # Colocar la ficha en el punto de destino
+        self.__points__[to_point].append(moving_checker)
+        moving_checker.move_to(to_point)
+        
+        return captured_checker
+    
+    def _move_checker_to_bar(self, checker: Checker) -> None:
+        
+        checker.move_to_bar()
+        if checker.player_id == 1:
+            self.__bar_player1__.append(checker)
+        else:
+            self.__bar_player2__.append(checker)
+    
+    def get_bar_checkers(self, player_id: int) -> List[Checker]:
+       
+        if player_id == 1:
+            return self.__bar_player1__.copy()
+        else:
+            return self.__bar_player2__.copy()
+    
+    def has_checkers_on_bar(self, player_id: int) -> bool:
+       
+        return len(self.get_bar_checkers(player_id)) > 0
+    
+    def can_enter_from_bar(self, to_point: int, player_id: int) -> bool:
+        
+        # Verificar que el jugador tenga fichas en la barra
+        if not self.has_checkers_on_bar(player_id):
+            return False
+        
+        # Verificar que el punto esté en el rango correcto para reingreso
+        if player_id == 1:
+            # Jugador 1 reingresa en puntos 18-23
+            if to_point < 18 or to_point > 23:
+                return False
+        else:
+            # Jugador 2 reingresa en puntos 0-5
+            if to_point < 0 or to_point > 5:
+                return False
+        
+        # Verificar que el punto esté abierto
+        return self.is_point_open(to_point, player_id)
+    
+    def enter_from_bar(self, to_point: int, player_id: int) -> Optional[Checker]:
+      
+        if not self.can_enter_from_bar(to_point, player_id):
+            raise InvalidMoveException(-1, to_point, "No se puede reingresar desde la barra")
+        
+        # Sacar ficha de la barra
+        if player_id == 1:
+            entering_checker = self.__bar_player1__.pop()
+        else:
+            entering_checker = self.__bar_player2__.pop()
+        
+        # Verificar si hay que capturar
+        captured_checker = None
+        to_checkers = self.get_point_checkers(to_point)
+        
+        if to_checkers and len(to_checkers) == 1 and to_checkers[0].player_id != player_id:
+            captured_checker = self.__points__[to_point].pop()
+            self._move_checker_to_bar(captured_checker)
+        
+        # Colocar la ficha en el tablero
+        entering_checker.move_from_bar_to(to_point)
+        self.__points__[to_point].append(entering_checker)
+        
+        return captured_checker
+    
+    def can_bear_off_from(self, from_point: int, player_id: int, dice_value: int) -> bool:
+       
+        # Verificar que el jugador pueda sacar fichas
+        if not self._can_player_bear_off(player_id):
+            return False
+        
+        # Verificar que haya una ficha del jugador en ese punto
+        from_checkers = self.get_point_checkers(from_point)
+        if not from_checkers or from_checkers[0].player_id != player_id:
+            return False
+        
+        # Calcular el valor necesario para sacar desde ese punto
+        if player_id == 1:
+            required_value = from_point + 1  # Punto 0 necesita dado 1, etc.
+        else:
+            required_value = 24 - from_point  # Punto 23 necesita dado 1, etc.
+        
+        # Se puede usar valor exacto
+        if dice_value == required_value:
+            return True
+        
+        # Se puede usar valor mayor si no hay fichas en puntos más alejados
+        if dice_value > required_value:
+            return not self._has_checkers_further_out(player_id, from_point)
+        
+        return False
     
