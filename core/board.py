@@ -71,4 +71,65 @@ class Board:
         if not checkers:
             return None
         return checkers[0].player_id
-   
+    def get_point_checker_count(self, point: int) -> int:
+       
+        return len(self.get_point_checkers(point))
+    
+    def is_point_blocked(self, point: int, player_id: int) -> bool:
+       
+        checkers = self.get_point_checkers(point)
+        if len(checkers) >= 2:
+            # Está bloqueado si las fichas son del oponente
+            return checkers[0].player_id != player_id
+        return False
+    
+    def is_point_open(self, point: int, player_id: int) -> bool:
+       
+        checkers = self.get_point_checkers(point)
+        
+        # Punto vacío
+        if not checkers:
+            return True
+        
+        # Fichas propias
+        if checkers[0].player_id == player_id:
+            return True
+        
+        # Solo una ficha del oponente (se puede capturar)
+        if len(checkers) == 1:
+            return True
+        
+        # Dos o más fichas del oponente (bloqueado)
+        return False
+    
+    def can_move_from_to(self, from_point: int, to_point: int, player_id: int) -> bool:
+       
+        try:
+            # Verificar que los puntos sean válidos
+            if from_point < 0 or from_point > 23 or to_point < 0 or to_point > 23:
+                return False
+            
+            # Verificar que haya una ficha del jugador en el punto de origen
+            from_checkers = self.get_point_checkers(from_point)
+            if not from_checkers or from_checkers[0].player_id != player_id:
+                return False
+            
+            # Verificar que el punto de destino esté abierto
+            if not self.is_point_open(to_point, player_id):
+                return False
+            
+            # Verificar dirección de movimiento
+            if player_id == 1:
+                # Jugador 1 se mueve hacia posiciones menores
+                if to_point >= from_point:
+                    return False
+            else:
+                # Jugador 2 se mueve hacia posiciones mayores
+                if to_point <= from_point:
+                    return False
+            
+            return True
+            
+        except InvalidPointException:
+            return False
+    
