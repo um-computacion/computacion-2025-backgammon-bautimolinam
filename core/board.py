@@ -368,4 +368,85 @@ class Board:
                     valid_moves.append((point, -1))
         
         return valid_moves
+    def _get_bar_entry_range(self, player_id: int) -> Tuple[int, int]:
+       
+        if player_id == 1:
+            return (18, 23)  # Jugador 1 reingresa en tablero casa del jugador 2
+        else:
+            return (0, 5)    # Jugador 2 reingresa en tablero casa del jugador 1
     
+    def get_pip_count(self, player_id: int) -> int:
+        
+      
+        pip_count = 0
+        
+        # Fichas en el tablero
+        for point in range(24):
+            checkers = self.get_point_checkers(point)
+            player_checkers_count = sum(1 for c in checkers if c.player_id == player_id)
+            
+            if player_checkers_count > 0:
+                if player_id == 1:
+                    # Jugador 1: distancia desde punto 0
+                    distance = point + 1
+                else:
+                    # Jugador 2: distancia hasta punto 23
+                    distance = 24 - point
+                
+                pip_count += player_checkers_count * distance
+        
+        # Fichas en la barra (distancia máxima + 1)
+        bar_checkers_count = len(self.get_bar_checkers(player_id))
+        pip_count += bar_checkers_count * 25
+        
+        return pip_count
+    
+    def get_board_representation(self) -> Dict[str, any]:
+       
+        representation = {
+            'points': {},
+            'bar': {
+                'player1': len(self.__bar_player1__),
+                'player2': len(self.__bar_player2__)
+            },
+            'borne_off': {
+                'player1': len(self.__borne_off_player1__),
+                'player2': len(self.__borne_off_player2__)
+            },
+            'pip_count': {
+                'player1': self.get_pip_count(1),
+                'player2': self.get_pip_count(2)
+            }
+        }
+        
+        # Estado de cada punto
+        for point in range(24):
+            checkers = self.get_point_checkers(point)
+            if checkers:
+                representation['points'][point] = {
+                    'player_id': checkers[0].player_id,
+                    'count': len(checkers)
+                }
+            else:
+                representation['points'][point] = {
+                    'player_id': None,
+                    'count': 0
+                }
+        
+        return representation
+    
+    def is_blocked_point_sequence(self, start_point: int, length: int, player_id: int) -> bool:
+       
+        if start_point < 0 or start_point + length > 24:
+            return False
+        
+        for i in range(length):
+            point = start_point + i
+            checkers = self.get_point_checkers(point)
+            
+            if len(checkers) < 2 or checkers[0].player_id != player_id:
+                return False
+        
+        return True
+    
+   
