@@ -448,5 +448,114 @@ class Board:
                 return False
         
         return True
+    def get_longest_blocked_sequence(self, player_id: int) -> int:
+        
+        max_length = 0
+        current_length = 0
+        
+        for point in range(24):
+            checkers = self.get_point_checkers(point)
+            
+            if len(checkers) >= 2 and checkers[0].player_id == player_id:
+                current_length += 1
+                max_length = max(max_length, current_length)
+            else:
+                current_length = 0
+        
+        return max_length
     
+    def copy(self) -> 'Board':
+        
+        new_board = Board()
+        
+        # Copiar puntos
+        for point, checkers in self.__points__.items():
+            new_board.__points__[point] = []
+            for checker in checkers:
+                new_checker = Checker(checker.player_id, checker.position)
+                if checker.is_on_bar:
+                    new_checker.move_to_bar()
+                elif checker.is_borne_off:
+                    new_checker.bear_off()
+                new_board.__points__[point].append(new_checker)
+        
+        # Copiar barras
+        for checker in self.__bar_player1__:
+            new_checker = Checker(checker.player_id)
+            new_checker.move_to_bar()
+            new_board.__bar_player1__.append(new_checker)
+        
+        for checker in self.__bar_player2__:
+            new_checker = Checker(checker.player_id)
+            new_checker.move_to_bar()
+            new_board.__bar_player2__.append(new_checker)
+        
+        # Copiar fichas sacadas
+        for checker in self.__borne_off_player1__:
+            new_checker = Checker(checker.player_id)
+            new_checker.bear_off()
+            new_board.__borne_off_player1__.append(new_checker)
+        
+        for checker in self.__borne_off_player2__:
+            new_checker = Checker(checker.player_id)
+            new_checker.bear_off()
+            new_board.__borne_off_player2__.append(new_checker)
+        
+        return new_board
+    
+    def __str__(self) -> str:
+     
+        lines = []
+        lines.append("Backgammon Board:")
+        lines.append("=" * 50)
+        
+        # Puntos 12-23 (parte superior)
+        upper_points = []
+        upper_counts = []
+        for point in range(12, 24):
+            checkers = self.get_point_checkers(point)
+            if checkers:
+                player_char = 'X' if checkers[0].player_id == 1 else 'O'
+                upper_points.append(f"{point:2d}:{player_char}")
+                upper_counts.append(f"({len(checkers)})")
+            else:
+                upper_points.append(f"{point:2d}: ")
+                upper_counts.append("   ")
+        
+        lines.append(" ".join(upper_points))
+        lines.append(" ".join(upper_counts))
+        lines.append("-" * 50)
+        
+        # Información de barras y fichas sacadas
+        bar1 = len(self.__bar_player1__)
+        bar2 = len(self.__bar_player2__)
+        off1 = len(self.__borne_off_player1__)
+        off2 = len(self.__borne_off_player2__)
+        
+        lines.append(f"Bar: P1({bar1}) P2({bar2}) | Borne off: P1({off1}) P2({off2})")
+        lines.append("-" * 50)
+        
+        # Puntos 11-0 (parte inferior)
+        lower_counts = []
+        lower_points = []
+        for point in range(11, -1, -1):
+            checkers = self.get_point_checkers(point)
+            if checkers:
+                player_char = 'X' if checkers[0].player_id == 1 else 'O'
+                lower_counts.append(f"({len(checkers)})")
+                lower_points.append(f"{point:2d}:{player_char}")
+            else:
+                lower_counts.append("   ")
+                lower_points.append(f"{point:2d}: ")
+        
+        lines.append(" ".join(lower_counts))
+        lines.append(" ".join(lower_points))
+        
+        return "\n".join(lines)
+    
+    def __repr__(self) -> str:
+        
+        return (f"Board(points={len([p for p in self.__points__.values() if p])}, "
+                f"bar_p1={len(self.__bar_player1__)}, bar_p2={len(self.__bar_player2__)}, "
+                f"off_p1={len(self.__borne_off_player1__)}, off_p2={len(self.__borne_off_player2__)})")
    
