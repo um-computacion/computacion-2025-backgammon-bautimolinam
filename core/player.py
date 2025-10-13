@@ -162,4 +162,84 @@ class Player:
        
         return -1 if self.__player_id__ == 1 else 1
     
+    def get_bar_entry_range(self) -> tuple[int, int]:
+        
+        if self.__player_id__ == 1:
+            return (18, 23)  # Jugador 1 reingresa en tablero casa del jugador 2
+        else:
+            return (0, 5)    # Jugador 2 reingresa en tablero casa del jugador 1
+    
+    @property
+    def is_turn(self) -> bool:
+      
+        return self.__is_turn__
+    
+    def start_turn(self) -> None:
+        
+        self.__is_turn__ = True
+    
+    def end_turn(self) -> None:
+       
+        self.__is_turn__ = False
+    
+    def move_checker_to_bar(self, checker: Checker) -> bool:
+        
+        if checker in self.__checkers__ and checker.is_movable():
+            checker.move_to_bar()
+            return True
+        return False
+    
+    def move_checker_from_bar_to(self, position: int) -> bool:
+       
+        checkers_on_bar = self.get_checkers_on_bar()
+        if checkers_on_bar:
+            checkers_on_bar[0].move_from_bar_to(position)
+            return True
+        return False
+    
+    def bear_off_checker_at(self, position: int) -> bool:
+        
+        checkers_at_position = self.get_checkers_at_position(position)
+        if checkers_at_position and self.can_bear_off():
+            checkers_at_position[0].bear_off()
+            return True
+        return False
+    
+    def move_checker(self, from_position: int, to_position: int) -> bool:
+       
+        checkers_at_origin = self.get_checkers_at_position(from_position)
+        if checkers_at_origin:
+            checkers_at_origin[0].move_to(to_position)
+            return True
+        return False
+    
+    def reset_to_starting_position(self) -> None:
+        
+        for checker in self.__checkers__:
+            checker.__position__ = None
+            checker.__is_on_bar__ = False
+            checker.__is_borne_off__ = False
+        
+        self._initialize_starting_positions()
+        self.__is_turn__ = False
+    
+    def __str__(self) -> str:
+      
+        return (f"{self.__name__} (ID: {self.__player_id__}) - "
+                f"En juego: {self.checkers_in_play_count}, "
+                f"En barra: {self.checkers_on_bar_count}, "
+                f"Sacadas: {self.checkers_borne_off_count}")
+    
+    def __repr__(self) -> str:
+       
+        return (f"Player(player_id={self.__player_id__}, name='{self.__name__}', "
+                f"checkers_count={len(self.__checkers__)}, is_turn={self.__is_turn__})")
+    
+    def __eq__(self, other) -> bool:
+       
+        if not isinstance(other, Player):
+            return False
+        
+        return self.__player_id__ == other.__player_id__
+    
    
