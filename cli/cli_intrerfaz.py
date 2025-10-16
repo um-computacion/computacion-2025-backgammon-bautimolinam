@@ -4,7 +4,7 @@ import sys
 from typing import List, Tuple, Optional
 from ..core.game import BackgammonGame, GameState, MoveType
 from ..core import (
-    BackgammonException, InvalidMoveException, 
+    Exception, InvalidMoveException, 
     GameNotStartedException, GameAlreadyFinishedException
 )
 
