@@ -25,9 +25,9 @@ COLOR_PANEL = (25, 25, 40)           # Azul muy oscuro
 
 # Dimensiones
 ANCHO = 1400
-ALTO = 900
+ALTO = 770
 MARGEN = 30
-ANCHO_TABLERO = 900
+ANCHO_TABLERO = 850
 ALTO_TABLERO = 700
 ANCHO_PANEL = 400
 ANCHO_PUNTO = 65
@@ -103,14 +103,20 @@ class PygameInterface:
     
     def _nueva_partida(self) -> None:
         """Inicia nueva partida."""
-        self.__game__ = BackgammonGame("Jugador 1", "Jugador 2")
-        self.__game__.start_game()
-        self.__selected__ = None
-        self.__valid_moves__ = []
-        self.__log__ = []
-        self._add_log(">>> Nueva partida iniciada")
-        self._add_log(f">>> {self.__game__.get_current_player().name} vs {self.__game__.get_player_by_id(2).name}")
-        self._set_mensaje("Nueva partida iniciada. Presiona 'R' para tirar dados", "success")
+        try:
+            self.__game__ = BackgammonGame("Jugador 1", "Jugador 2")
+            self.__game__.start_game()
+            self.__selected__ = None
+            self.__valid_moves__ = []
+            self.__log__ = []
+            self._add_log(">>> Nueva partida iniciada")
+            self._add_log(f">>> {self.__game__.get_current_player().name} vs {self.__game__.get_player_by_id(2).name}")
+            self._set_mensaje("Nueva partida iniciada. Presiona 'R' para tirar dados", "success")
+        except Exception as e:
+            print(f"Error al iniciar partida: {e}")
+            import traceback
+            traceback.print_exc()
+            self._set_mensaje(f"Error: {e}", "error")
     
     def _tirar_dados(self) -> None:
         """Tira los dados."""
@@ -208,8 +214,9 @@ class PygameInterface:
             if self._es_origen_valido(punto):
                 self.__selected__ = punto
                 self.__valid_moves__ = self._get_destinos_validos(punto)
-                self._set_mensaje(f"Punto {punto} seleccionado. Click en destino", "info")
-                self._add_log(f">>> Seleccionado: punto {punto}")
+                punto_str = "bar" if punto == -1 else f"punto {punto}"
+                self._set_mensaje(f"{punto_str} seleccionado. Click en destino", "info")
+                self._add_log(f">>> Seleccionado: {punto_str}")
         else:
             # Intentar mover
             try:
@@ -251,6 +258,11 @@ class PygameInterface:
             self._set_mensaje("Primero tira los dados con 'R'", "error")
             return False
         
+        # Para el bar
+        if punto == -1:
+            return self.__game__.board.has_checkers_on_bar(self.__game__.get_current_player().player_id)
+        
+        # Para puntos normales
         checkers = self.__game__.board.get_point_checkers(punto)
         if not checkers:
             return False
@@ -265,6 +277,14 @@ class PygameInterface:
     def _get_punto(self, pos: Tuple[int, int]) -> Optional[int]:
         """Convierte posición del mouse a número de punto."""
         x, y = pos
+        
+        # Detectar click en el BAR (lateral derecho)
+        bar_x_start = MARGEN + ANCHO_TABLERO + 10
+        bar_x_end = MARGEN + ANCHO_TABLERO + 60
+        
+        if bar_x_start <= x <= bar_x_end and MARGEN <= y <= MARGEN + ALTO_TABLERO:
+            return -1  # El bar
+        
         x -= MARGEN
         y -= MARGEN
         
@@ -311,6 +331,20 @@ class PygameInterface:
         pygame.draw.rect(self.__screen__, COLOR_TABLERO, rect)
         pygame.draw.rect(self.__screen__, COLOR_BORDE, rect, 3)
         
+        # Barra lateral derecha (BAR) - fuera del área de juego
+        bar_x = MARGEN + ANCHO_TABLERO + 10
+        bar_rect = pygame.Rect(bar_x, MARGEN, 50, ALTO_TABLERO)
+        pygame.draw.rect(self.__screen__, (50, 45, 40), bar_rect)
+        pygame.draw.rect(self.__screen__, COLOR_BORDE, bar_rect, 3)
+        
+        # Etiqueta "BAR" vertical
+        color_bar = COLOR_SELECCION if self.__selected__ == -1 else COLOR_TEXTO
+        text = self.__font_pequena__.render("BAR", True, color_bar)
+        # Rotar el texto 90 grados
+        text = pygame.transform.rotate(text, 90)
+        text_rect = text.get_rect(center=(bar_x + 25, MARGEN + ALTO_TABLERO // 2))
+        self.__screen__.blit(text, text_rect)
+        
         # Puntos triangulares
         for i in range(12):
             x = MARGEN + i * (ANCHO_TABLERO / 12)
@@ -350,6 +384,43 @@ class PygameInterface:
     
     def _draw_fichas(self) -> None:
         """Dibuja las fichas."""
+        # Fichas en el BAR (lateral derecho)
+        bar_x = MARGEN + ANCHO_TABLERO + 35  # Centro de la barra lateral
+        
+        for player_id in [1, 2]:
+            # Obtener fichas del bar usando el atributo correcto
+            if player_id == 1:
+                bar_checkers = self.__game__.board.__bar_player1__
+            else:
+                bar_checkers = self.__game__.board.__bar_player2__
+            
+            if bar_checkers:
+                # Posición vertical según jugador
+                base_y = MARGEN + 80 if player_id == 1 else MARGEN + ALTO_TABLERO - 80
+                
+                color_ficha = COLOR_FICHA_P1 if player_id == 1 else COLOR_FICHA_P2
+                color_borde = COLOR_FICHA_P2 if player_id == 1 else COLOR_FICHA_P1
+                
+                # Resaltar si el bar es destino válido
+                if -1 in self.__valid_moves__:
+                    pygame.draw.circle(self.__screen__, COLOR_SELECCION, 
+                                     (bar_x, int(base_y)), RADIO_FICHA + 5, 3)
+                
+                # Dibujar fichas en el bar
+                for i, checker in enumerate(bar_checkers[:8]):
+                    offset = 35 if player_id == 1 else -35
+                    pos_y = base_y + i * offset
+                    pygame.draw.circle(self.__screen__, color_ficha, (bar_x, int(pos_y)), RADIO_FICHA)
+                    pygame.draw.circle(self.__screen__, color_borde, (bar_x, int(pos_y)), RADIO_FICHA, 2)
+                
+                # Número si hay muchas fichas
+                if len(bar_checkers) > 8:
+                    text = self.__font_pequena__.render(str(len(bar_checkers)), True, COLOR_SELECCION)
+                    offset = 35 * 7 if player_id == 1 else -35 * 7
+                    rect = text.get_rect(center=(bar_x, int(base_y + offset)))
+                    self.__screen__.blit(text, rect)
+        
+        # Fichas en los puntos del tablero
         for punto in range(24):
             checkers = self.__game__.board.get_point_checkers(punto)
             if not checkers:
@@ -388,7 +459,7 @@ class PygameInterface:
     
     def _draw_panel(self) -> None:
         """Dibuja panel lateral estilo CLI."""
-        x_panel = MARGEN + ANCHO_TABLERO + 20
+        x_panel = MARGEN + ANCHO_TABLERO + 80  # Mover panel más a la derecha
         y = MARGEN
         
         # Fondo del panel

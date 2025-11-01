@@ -33,7 +33,7 @@ def main():
     print("  N - Nueva partida")
     print("  R - Tirar dados")
     print("  H - Mostrar/ocultar ayuda")
-    print("  ESC - Salir")
+    print(" Q - Salir")
     print()
     print("Iniciando ventana gráfica...")
     print()
