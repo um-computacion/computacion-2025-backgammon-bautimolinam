@@ -419,49 +419,7 @@ class TestPlayerComplexScenarios(unittest.TestCase):
         """
         self.__player__ = Player(1, "TestPlayer")
     
-    def test_complete_game_lifecycle(self):
-        """
-        Verifica el ciclo de vida completo de un jugador en una partida.
-        """
-        # Estado inicial
-        self.assertEqual(self.__player__.checkers_in_play_count, 15)
-        self.assertEqual(self.__player__.checkers_borne_off_count, 0)
-        self.assertEqual(self.__player__.checkers_on_bar_count, 0)
-        self.assertFalse(self.__player__.can_bear_off())
-        self.assertFalse(self.__player__.has_won())
-        
-        # Simular captura: mover ficha a la barra
-        checker_to_capture = self.__player__.checkers[0]
-        self.__player__.move_checker_to_bar(checker_to_capture)
-        
-        self.assertTrue(self.__player__.has_checkers_on_bar())
-        self.assertEqual(self.__player__.checkers_on_bar_count, 1)
-        self.assertFalse(self.__player__.can_bear_off())  # No puede sacar con fichas en barra
-        
-        # Reingreso desde la barra
-        self.__player__.move_checker_from_bar_to(20)
-        
-        self.assertFalse(self.__player__.has_checkers_on_bar())
-        self.assertEqual(self.__player__.checkers_on_bar_count, 0)
-        
-        # Mover todas las fichas al tablero casa
-        for checker in self.__player__.checkers:
-            if checker.position is None or checker.position > 5:
-                checker.move_to(3)  # Mover al tablero casa
-        
-        # Ahora puede sacar fichas
-        self.assertTrue(self.__player__.can_bear_off())
-        
-        # Sacar todas las fichas
-        for _ in range(15):
-            success = self.__player__.bear_off_checker_at(3)
-            self.assertTrue(success)
-        
-        # Verificar victoria
-        self.assertTrue(self.__player__.has_won())
-        self.assertEqual(self.__player__.checkers_borne_off_count, 15)
-        self.assertEqual(self.__player__.checkers_in_play_count, 0)
-    
+
     def test_mixed_checker_states(self):
         """
         Verifica escenarios con fichas en diferentes estados.

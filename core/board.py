@@ -5,12 +5,11 @@ Este módulo implementa la representación del tablero y todas las operaciones
 relacionadas con las posiciones, movimientos válidos y reglas del juego.
 """
 
-from typing import List, Dict, Optional, Tuple
+from typing import List,  Optional, Tuple
 from .checker import Checker
 from .player import Player
 from .exception import (
-    InvalidPointException, InvalidMoveException, 
-    CheckerNotAvailableException, CannotBearOffException
+    InvalidPointException, InvalidMoveException,  CannotBearOffException
 )
 
 
